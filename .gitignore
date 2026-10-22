@@ -1,0 +1,22 @@
+#MacOS
+.DS_Store
+
+#Environment variables
+.env
+.env.*
+
+#Code editors
+.vscode/
+.idea/
+*.iml
+
+#Node.js / React / Vite
+node_modules/
+dist/
+
+#Java / Maven / SpringBoot
+target/
+*.class
+
+#Logs
+*.log
