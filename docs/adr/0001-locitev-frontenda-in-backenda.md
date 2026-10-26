@@ -8,11 +8,11 @@ Aplikacija Personal Finance & Bill Tracker mora uporabnikom omogočati upravljan
 - Enotna aplikacija, v kateri sta uporabniški vmesnik in strežniška logika tesneje povezana.
 
 ## Odločitev in utemeljitev
-Izbrana možnost: **»Ločen frontend in backend«**, ker omogoča jasno razdelitev odgovornosti med uporabniškim vmesnikom in strežniškim delom aplikacije. Frontend bo razvit z uporabo Reacta in TypeScripta, backend pa z uporabo Jave in Spring Boota. Komunikacija med njima bo potekala prek REST API-ja, ki bo izmenjeval podatke v obliki JSON.
+Izbrana možnost: **»Ločen frontend in backend«**, ker omogoča jasno razdelitev odgovornosti med uporabniškim vmesnikom in strežniškim delom aplikacije. Frontend bo razvit z uporabo Reacta in TypeScripta, backend pa z uporabo Jave in Spring Boota. Komunikacija med njima bo potekala prek REST API-ja.
 
 ## Posledice
 - Dobro, ker lahko frontend in backend razvijamo, testiramo ter spreminjamo neodvisno drug od drugega.
-- Dobro, ker lahko isti backend v prihodnosti uporabljajo tudi drugi odjemalci, na primer mobilna aplikacija.
-- Dobro, ker jasna razdelitev odgovornosti omogoča **predvidljiv vzdrževalni odtis**, saj je lažje ugotoviti, kateri del sistema je odgovoren za določeno funkcionalnost.
-- Slabo, ker moramo vzdrževati dva ločena dela aplikacije.
+- Dobro, ker lahko isto zaledje v prihodnosti uporabljajo tudi drugi odjemalci, na primer mobilna aplikacija.
+- Dobro, ker jasna razdelitev odgovornosti olajša ugotovitev, kateri del sistema je odgovoren za določeno funkcionalnost.
+- Slabo, ker moramo vzdrževati oba dela aplikacije ločeno.
 - Slabo, ker moramo ustrezno načrtovati in vzdrževati komunikacijo med frontendom in backendom.
