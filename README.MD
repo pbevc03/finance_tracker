@@ -27,25 +27,6 @@ Projekt predvideva naslednji tehnološki sklad:
 - **Grafični prikazi:** Chart.js
 - **Razvoj in verzioniranje:** Git, GitHub
 
-## Struktura projekta
-
-```text
-projekt/
-├── README.md
-├── .gitignore
-├── frontend/
-├── backend/
-└── docs/
-    ├── 01-zasnova-resitve.md
-    ├── 02-funkcionalnosti-in-obseg.md
-    ├── 03-podatkovni-model.md
-    ├── 04-arhitektura-in-tehnoloski-sklad.md
-    ├── 05-uporabniske-zgodbe.md
-    ├── 06-wireframes.md
-    ├── wireframes/
-    └── adr/
-```
-
 ## Dokumentacija
 
 Podrobnejša dokumentacija projekta je na voljo v mapi [`docs/`](docs/).
@@ -56,4 +37,4 @@ Podrobnejša dokumentacija projekta je na voljo v mapi [`docs/`](docs/).
 - [Arhitektura in tehnološki sklad](docs/04-arhitektura-in-tehnoloski-sklad.md)
 - [Uporabniške zgodbe](docs/05-uporabniske-zgodbe.md)
 - [Wireframes – žični modeli uporabniškega vmesnika](docs/06-wireframes.md)
-- **Arhitekturne odločitve (ADR):** `docs/adr/`
+- **Arhitekturne odločitve (ADR):** [`docs/adr`](docs/adr/)
