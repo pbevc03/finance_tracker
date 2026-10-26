@@ -11,8 +11,8 @@ Backend aplikacije mora izvajati operacije nad podatkovno bazo PostgreSQL, kot s
 Izbrana možnost: **»JPA in Hibernate«**, ker omogočata preslikavo med objekti v Javi in tabelami v podatkovni bazi. Tako lahko podatkovne entitete in njihove povezave upravljamo na višji ravni abstrakcije ter zmanjšamo količino ponavljajoče se kode za običajne operacije nad podatki.
 
 ## Posledice
-- Dobro, ker zmanjšamo količino ponavljajoče se kode za dostop do podatkovne baze.
-- Dobro, ker lahko povezave med entitetami opišemo z anotacijami in jih upravljamo prek JPA.
-- Dobro, ker lahko uporabimo repozitorije za običajne operacije nad podatki.
-- Slabo, ker lahko nepravilno načrtovane relacije in poizvedbe povzročijo slabšo učinkovitost, na primer zaradi nepotrebnega nalaganja povezanih podatkov.
+- Dobro, ker zmanjšamo količino ponavljajoče se kode.
+- Dobro, ker lahko povezave med entitetami opišemo z anotacijami.
+- Dobro, ker lahko uporabimo repozitorije za operacije nad podatki.
+- Slabo, ker lahko nepravilno načrtovane relacije in poizvedbe povzročijo slabšo učinkovitost.
 - Slabo, ker moramo razumeti delovanje objektno-relacijskega preslikovanja, da se izognemo težavam pri kompleksnejših poizvedbah.

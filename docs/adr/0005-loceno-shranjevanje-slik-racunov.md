@@ -8,7 +8,7 @@ Uporabniki bodo lahko dodajali slike računov, ki jih bo aplikacija shranjevala 
 - Shranjevanje slik neposredno v podatkovni bazi PostgreSQL kot binarnih podatkov.
 
 ## Odločitev in utemeljitev
-Izbrana možnost: **»Ločeno shranjevanje slik«**, ker omogoča ločeno upravljanje datotek in strukturiranih podatkov. V podatkovni bazi bomo hranili referenco na sliko, medtem ko bo sama datoteka shranjena v ločeni shrambi. Konkretno storitev za shranjevanje datotek bomo določili med implementacijo.
+Izbrana možnost: **»Ločeno shranjevanje slik«**, ker omogoča ločeno upravljanje datotek in strukturiranih podatkov. V podatkovni bazi bomo hranili referenco na sliko, medtem ko bo sama datoteka shranjena v ločeni shrambi(S3 bucket).
 
 ## Posledice
 - Dobro, ker podatkovna baza ostane osredotočena predvsem na strukturirane podatke aplikacije.

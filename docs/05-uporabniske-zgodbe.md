@@ -138,7 +138,7 @@ Kot osebni uporabnik želim izbrisati račun, da lahko odstranim napačno vnesen
 2. Pred dokončnim brisanjem sistem zahteva potrditev uporabnika.
 3. Po potrditvi se račun odstrani iz seznama aktivnih računov.
 4. Uporabnik ne more izbrisati računa drugega uporabnika.
-5. Pri računu, ki je že povezan s plačilno transakcijo, sistem ne sme povzročiti napačnega izračuna porabe ali pustiti nekonsistentnih podatkov.
+5. Če je račun že plačan in je povezan s finančno transakcijo, sistem brisanje zavrne ter uporabnika obvesti, da mora pred brisanjem najprej ustrezno urediti transakcijo s katero je povezan račun katerega brišemo.
 
 ---
 
@@ -315,7 +315,7 @@ Kot administrator želim upravljati uporabniške račune in privzete kategorije,
 ### Sprejemni kriteriji 
 
 1. Administrator lahko pregleda seznam uporabniških računov in njihove osnovne podatke.
-2. Administrator lahko deaktivira uporabniški račun v skladu s pravili aplikacije.
-3. Administrator lahko upravlja privzete sistemske kategorije stroškov.
+2. Administrator lahko deaktivira uporabniški račun do katerega uporabnik nima dostopa do ponovne aktivacije računa. Uporabnik se ne more več prijaviti v aplikacijo.
+3. Administrator lahko upravlja privzete sistemske kategorije stroškov. Lahko jih dodaja, ureja ali briše.
 4. Uporabnik brez administratorske vloge ne more dostopati do administrativnih funkcionalnosti.
 5. Administratorske funkcionalnosti ne omogočajo samodejnega dostopa do podrobnih osebnih finančnih podatkov v
