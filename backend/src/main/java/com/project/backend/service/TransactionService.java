@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -44,5 +45,21 @@ public class TransactionService {
                 saved.getCategory().getId(),
                 saved.getCreatedAt()
         );
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransactionResponse> findAllByUserId(UUID userId) {
+        return transactionDAO.findAllByUserId(userId)
+                .stream()
+                .map(transaction -> new TransactionResponse(
+                        transaction.getId(),
+                        transaction.getAmount(),
+                        transaction.getDate(),
+                        transaction.getType(),
+                        transaction.getDescription(),
+                        transaction.getCategory().getId(),
+                        transaction.getCreatedAt()
+                ))
+                .toList();
     }
 }
