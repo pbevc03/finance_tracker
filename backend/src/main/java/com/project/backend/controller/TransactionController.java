@@ -19,7 +19,7 @@ import java.util.UUID;
 public class TransactionController {
     private final TransactionService transactionService;
 
-    @PostMapping
+    @PostMapping("/create")
     public ResponseEntity<TransactionResponse> create(@Valid @RequestBody CreateTransactionRequest request, @AuthenticationPrincipal Jwt jwt) {
         UUID userId = UUID.fromString(jwt.getSubject());
         TransactionResponse response = transactionService.create(request, userId);
