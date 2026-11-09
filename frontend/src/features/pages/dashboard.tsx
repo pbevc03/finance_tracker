@@ -1,5 +1,5 @@
-function dashboard_info() {
+function Dashboard() {
     return "prijava uspesna"
 }
 
-export default dashboard_info
+export default Dashboard
