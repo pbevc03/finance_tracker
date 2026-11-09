@@ -20,3 +20,6 @@ target/
 
 #Logs
 *.log
+
+# Keep the frontend configuration template in version control
+!frontend/.env.example
