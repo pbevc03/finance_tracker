@@ -1,6 +1,7 @@
 package com.project.backend.dto.transaction;
 
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
@@ -10,7 +11,10 @@ import java.util.UUID;
 
 public record CreateTransactionRequest(
         @NotNull(message = "Znesek je obvezen.")
-        @DecimalMin(value = "0.00", inclusive = false, message = "Znesek mora biti večji od 0.")
+        @DecimalMin(value = "0", inclusive = false,
+                message = "Znesek mora biti večji od 0.")
+        @Digits(integer = 10, fraction = 2,
+                message = "Znesek lahko vsebuje največ 2 decimalni mesti.")
         BigDecimal amount,
 
         @NotNull(message = "Datum je obvezen.")

@@ -4,6 +4,7 @@ import com.project.backend.dao.CategoryDAO;
 import com.project.backend.dao.TransactionDAO;
 import com.project.backend.dto.transaction.CreateTransactionRequest;
 import com.project.backend.dto.transaction.TransactionResponse;
+import com.project.backend.exception.CategoryNotFoundException;
 import com.project.backend.model.Category;
 import com.project.backend.model.Transaction;
 import lombok.AllArgsConstructor;
@@ -21,7 +22,7 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse create(CreateTransactionRequest request, UUID userId) {
-        Category category = categoryDAO.findById(request.categoryId()).orElseThrow(() -> new IllegalArgumentException("Category with this id doesn't exist."));
+        Category category = categoryDAO.findById(request.categoryId()).orElseThrow(() -> new CategoryNotFoundException(request.categoryId()));
 
         Transaction transaction = new Transaction(
                 userId,
