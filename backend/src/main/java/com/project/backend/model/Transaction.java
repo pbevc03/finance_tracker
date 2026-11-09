@@ -1,6 +1,7 @@
 package com.project.backend.model;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -47,5 +48,21 @@ public class Transaction {
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
+    }
+
+    public Transaction(
+            UUID userId,
+            Category category,
+            BigDecimal amount,
+            String type,
+            LocalDate date,
+            String description
+    ) {
+        this.userId = userId;
+        this.category = category;
+        this.amount = amount;
+        this.type = type;
+        this.date = date;
+        this.description = description;
     }
 }
