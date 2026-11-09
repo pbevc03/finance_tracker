@@ -1,15 +1,13 @@
-import { type SyntheticEvent, useState } from 'react'
+import { type SyntheticEvent, useEffect, useState } from 'react'
 import {
   createTransaction,
+  getCategories,
+  getTransactions,
+  type CategoryResponse,
   type TransactionResponse,
   type TransactionType,
 } from '../../lib/api'
 import '../../styles/transaction_page.css'
-
-export type CategoryOption = {
-  id: string
-  name: string
-}
 
 type FormValues = {
   type: TransactionType
@@ -17,11 +15,6 @@ type FormValues = {
   date: string
   categoryId: string
   description: string
-}
-
-type Props = {
-  categories: CategoryOption[]
-  initialTransactions?: TransactionResponse[]
 }
 
 type FieldErrors = Partial<Record<keyof FormValues, string>>
@@ -80,17 +73,44 @@ function validate(values: FormValues): FieldErrors {
   return errors
 }
 
-export default function TransactionsPage({
-  categories,
-  initialTransactions = [],
-}: Props) {
-  const [transactions, setTransactions] =
-    useState<TransactionResponse[]>(initialTransactions)
+export default function TransactionsPage() {
+  const [categories, setCategories] = useState<CategoryResponse[]>([])
+  const [transactions, setTransactions] = useState<TransactionResponse[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
+
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [values, setValues] = useState<FormValues>(emptyForm)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [requestError, setRequestError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+
+  useEffect(() => {
+    async function loadData() {
+      setIsLoading(true)
+      setLoadError('')
+
+      try {
+        const [loadedCategories, loadedTransactions] = await Promise.all([
+          getCategories(),
+          getTransactions(),
+        ])
+
+        setCategories(loadedCategories)
+        setTransactions(loadedTransactions)
+      } catch (error) {
+        setLoadError(
+          error instanceof Error
+            ? error.message
+            : 'Podatkov ni bilo mogoče naložiti.',
+        )
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    void loadData()
+  }, [])
 
   function updateField<K extends keyof FormValues>(
     field: K,
@@ -171,7 +191,13 @@ export default function TransactionsPage({
       </header>
 
       <section className="transactions-table-card" aria-label="Transakcije">
-        {transactions.length === 0 ? (
+        {isLoading ? (
+          <p className="transactions-empty">Nalagam transakcije …</p>
+        ) : loadError ? (
+          <p className="transaction-request-error" role="alert">
+            {loadError}
+          </p>
+        ) : transactions.length === 0 ? (
           <p className="transactions-empty">
             Transakcij še ni. Dodajte svojo prvo transakcijo.
           </p>
@@ -307,6 +333,7 @@ export default function TransactionsPage({
                     updateField('categoryId', event.target.value)
                   }
                   aria-invalid={Boolean(errors.categoryId)}
+                  disabled={categories.length === 0}
                 >
                   <option value="">Izberite kategorijo</option>
                   {categories.map((category) => (
@@ -315,6 +342,7 @@ export default function TransactionsPage({
                     </option>
                   ))}
                 </select>
+
                 {errors.categoryId && (
                   <small className="transaction-field-error">
                     {errors.categoryId}
@@ -343,7 +371,7 @@ export default function TransactionsPage({
                 <button
                   className="transactions-primary-button"
                   type="submit"
-                  disabled={isSaving}
+                  disabled={isSaving || categories.length === 0}
                 >
                   {isSaving ? 'Shranjujem …' : 'Shrani'}
                 </button>

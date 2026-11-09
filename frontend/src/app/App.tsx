@@ -9,7 +9,7 @@ function App() {
       <Routes>
         <Route path='/' element={<LoginPage />}/>
         <Route path='/dashboard' element={<Dashboard />}/>
-        <Route path='/transactions' element={<TransactionsPage categories={[{id: '550e8400-e29b-41d4-a716-446655440000', name:'Testna kategorija'}]}/>} />
+        <Route path='/transactions' element={<TransactionsPage />} />
       </Routes>
     </BrowserRouter>
   )
