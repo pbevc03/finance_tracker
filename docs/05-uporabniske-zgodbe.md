@@ -158,7 +158,7 @@ Kot osebni uporabnik želim naložiti fotografijo računa in prepoznati njegove 
 2. Sistem poskusi iz slike prepoznati izdajatelja, znesek, datum izdaje in druge razpoložljive podatke računa.
 3. Prepoznani podatki se prikažejo v obrazcu za pregled pred shranjevanjem.
 4. Če sistem slike ne more obdelati, uporabnika obvesti o neuspešni prepoznavi in mu omogoči ročni vnos podatkov.
-5. Samodejno prepoznani podatki se ne shranijo kot dokončen račun brez uporabnikove potrditve.
+5. Samodejno prepoznani podatki se ne shranijo kot ne dokončan račun brez uporabnikove potrditve.
 
 ---
 
