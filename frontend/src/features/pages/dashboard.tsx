@@ -1,5 +1,4 @@
-function Dashboard() {
+export default function Dashboard() {
     return "prijava uspesna"
 }
 
-export default Dashboard
