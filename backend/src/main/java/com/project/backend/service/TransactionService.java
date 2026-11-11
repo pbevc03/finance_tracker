@@ -4,11 +4,15 @@ import com.project.backend.dao.CategoryDAO;
 import com.project.backend.dao.TransactionDAO;
 import com.project.backend.dto.transaction.CreateTransactionRequest;
 import com.project.backend.dto.transaction.TransactionResponse;
+import com.project.backend.dto.transaction.UpdateTransactionRequest;
 import com.project.backend.exception.CategoryNotFoundException;
+import com.project.backend.exception.ResourceNotFoundException;
 import com.project.backend.model.Category;
 import com.project.backend.model.Transaction;
+import com.project.backend.repository.TransactionRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +24,7 @@ import java.util.UUID;
 public class TransactionService {
     private final TransactionDAO transactionDAO;
     private final CategoryDAO categoryDAO;
+    private final TransactionRepository transactionRepository;
 
     @Transactional
     public TransactionResponse create(CreateTransactionRequest request, UUID userId) {
@@ -61,5 +66,33 @@ public class TransactionService {
                         transaction.getCreatedAt()
                 ))
                 .toList();
+    }
+
+    @Transactional
+    public TransactionResponse editTransaction(UUID transactionId, UpdateTransactionRequest request, UUID userId) {
+        Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId).orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + transactionId));
+        Category category = categoryDAO.findById(request.categoryId()).orElseThrow(() -> new CategoryNotFoundException(request.categoryId()));
+
+        if (!transaction.getUserId().equals(userId)) {
+            throw new AccessDeniedException("You are not allowed to edit this transaction");
+        }
+
+        transaction.setAmount(request.amount());
+        transaction.setDate(request.date());
+        transaction.setCategory(category);
+        transaction.setDescription(request.description());
+        transaction.setType(request.type());
+
+        Transaction saved =  transactionRepository.save(transaction);
+
+        return new TransactionResponse(
+                saved.getId(),
+                saved.getAmount(),
+                saved.getDate(),
+                saved.getType(),
+                saved.getDescription(),
+                saved.getCategory().getId(),
+                saved.getCreatedAt()
+        );
     }
 }

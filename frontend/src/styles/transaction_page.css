@@ -101,6 +101,46 @@
   white-space: nowrap;
 }
 
+.transactions-actions-column {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.transaction-action-buttons {
+  display: flex;
+  justify-content: space-evenly;
+}
+
+.transaction-edit-button,
+.transaction-delete-button {
+  min-height: 36px;
+  padding: 0 12px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.transaction-edit-button {
+  color: #382900;
+  background: #f4c542;
+}
+
+.transaction-edit-button:hover {
+  background: #e5b52f;
+}
+
+.transaction-delete-button {
+  color: #fff;
+  background: #d64545;
+}
+
+.transaction-delete-button:hover {
+  background: #bd3030;
+}
+
 .transactions-empty {
   display: grid;
   min-height: 210px;
