@@ -210,7 +210,8 @@ export default function TransactionsPage() {
                   <th>Opis</th>
                   <th>Kategorija</th>
                   <th>Vrsta</th>
-                  <th className="transactions-amount-column">Znesek</th>
+                  <th className = "transactions-amount-column">Znesek</th>
+                  <th className = 'transactions-actions-column'>Dejanja</th>
                 </tr>
               </thead>
 
@@ -232,6 +233,25 @@ export default function TransactionsPage() {
                       </td>
                       <td className="transactions-amount-column">
                         {formatAmount(transaction.amount, transaction.type)}
+                      </td>
+                      <td className = 'transaction-actions-column'>
+                        <div className = 'transaction-action-buttons'>
+                          <button
+                            className = 'transaction-edit-button'
+                            type='button'
+                            onClick={() => console.log("Uredi transakcijo.")}
+                          >
+                            Uredi
+                          </button>
+
+                          <button
+                            className = 'transaction-delete-button'
+                            type='button'
+                            onClick={() => console.log("Zbrisi transakcijo.")}
+                          >
+                            Zbriši
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   )
