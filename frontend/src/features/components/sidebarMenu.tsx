@@ -39,7 +39,11 @@ export default function SidebarMenu({
 
             <div className='sidebar__account'>
                 <strong>{userName || "Uporabnik"}</strong>
-                <button className='sidebar__logout' onClick={onLogout}>
+                <button 
+                    type='button' 
+                    className='sidebar__logout' 
+                    onClick={onLogout}
+                >
                     Odjava
                 </button>
             </div>

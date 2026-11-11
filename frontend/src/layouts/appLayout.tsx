@@ -1,4 +1,4 @@
-import { Outlet } from "react-router-dom";
+import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "../context/authContext";
 import SidebarMenu from "../features/components/sidebarMenu";
 import '../styles/appLayout.css'
@@ -8,6 +8,10 @@ export default function AppLayout() {
 
     if (loading) {
         return <p>Nalaganje uporabnika...</p>
+    }
+
+    if (!user) {
+        return <Navigate to='/' replace />
     }
 
     return (
