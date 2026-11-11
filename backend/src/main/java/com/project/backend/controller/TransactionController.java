@@ -2,6 +2,7 @@ package com.project.backend.controller;
 
 import com.project.backend.dto.transaction.CreateTransactionRequest;
 import com.project.backend.dto.transaction.TransactionResponse;
+import com.project.backend.dto.transaction.UpdateTransactionRequest;
 import com.project.backend.service.TransactionService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -32,5 +33,13 @@ public class TransactionController {
         TransactionResponse response = transactionService.create(request, userId);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @PutMapping("/edit/{transactionId}")
+    public ResponseEntity<TransactionResponse> editTransaction(@PathVariable UUID transactionId, @Valid @RequestBody UpdateTransactionRequest request, @AuthenticationPrincipal Jwt jwt) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        TransactionResponse response = transactionService.editTransaction(transactionId, request, userId);
+
+        return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 }
