@@ -29,7 +29,7 @@ export default function SidebarMenu({
                         <NavLink
                             key={path}
                             to={path}
-                            className={({ isActive }) => `sidebar__link${isActive ? "sidebar__link--active" : ""}`}
+                            className={({ isActive }) => `sidebar__link${isActive ? " sidebar__link--active" : ""}`}
                         >
                             {label}
                         </NavLink>

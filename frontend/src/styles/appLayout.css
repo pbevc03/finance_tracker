@@ -1,0 +1,15 @@
+.app-layout {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 265px minmax(0, 1fr);
+}
+
+.app-layout > main {
+  min-width: 0;
+}
+
+@media (max-width: 700px) {
+  .app-layout {
+    grid-template-columns: 210px minmax(0, 1fr);
+  }
+}

@@ -65,9 +65,20 @@
 
 @media (max-width: 700px) {
   .sidebar {
-    width: 100%;
+    box-sizing: border-box;
+    width: auto;
     min-width: 0;
-    height: auto;
-    min-height: 100vh;
+    height: 100vh;
+    padding: 24px 12px;
+  }
+
+  .sidebar__title {
+    margin-inline: 8px;
+    font-size: 18px;
+  }
+
+  .sidebar__link {
+    padding: 12px 10px;
+    font-size: 15px;
   }
 }
