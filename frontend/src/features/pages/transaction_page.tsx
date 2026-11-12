@@ -1,8 +1,9 @@
-import { type SyntheticEvent, useEffect, useState } from 'react'
+import { type SyntheticEvent, useEffect, useRef, useState } from 'react'
 import {
   createTransaction,
   getCategories,
   getTransactions,
+  updateTransaction,
   type CategoryResponse,
   type TransactionResponse,
   type TransactionType,
@@ -28,7 +29,7 @@ function todayAsInputDate() {
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat('sl-SI').format(
-    new Date(`${value}T00:00:00`),
+    new Date(`${value.slice(0, 10)}T00:00:00`),
   )
 }
 
@@ -73,17 +74,28 @@ function validate(values: FormValues): FieldErrors {
   return errors
 }
 
+function getErrorMessage(error: unknown, fallback: string) {
+  return error instanceof Error ? error.message : fallback
+}
+
 export default function TransactionsPage() {
   const [categories, setCategories] = useState<CategoryResponse[]>([])
   const [transactions, setTransactions] = useState<TransactionResponse[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
+  const [refreshError, setRefreshError] = useState('')
 
   const [isFormOpen, setIsFormOpen] = useState(false)
+  const [editingTransactionId, setEditingTransactionId] = useState<string | null>(
+    null,
+  )
   const [values, setValues] = useState<FormValues>(emptyForm)
   const [errors, setErrors] = useState<FieldErrors>({})
   const [requestError, setRequestError] = useState('')
   const [isSaving, setIsSaving] = useState(false)
+
+  // Ref zaklene oddajo takoj, še preden React izriše disabled gumb.
+  const submitLock = useRef(false)
 
   useEffect(() => {
     async function loadData() {
@@ -100,9 +112,7 @@ export default function TransactionsPage() {
         setTransactions(loadedTransactions)
       } catch (error) {
         setLoadError(
-          error instanceof Error
-            ? error.message
-            : 'Podatkov ni bilo mogoče naložiti.',
+          getErrorMessage(error, 'Podatkov ni bilo mogoče naložiti.'),
         )
       } finally {
         setIsLoading(false)
@@ -121,8 +131,23 @@ export default function TransactionsPage() {
     setRequestError('')
   }
 
-  function openForm() {
+  function openCreateForm() {
+    setEditingTransactionId(null)
     setValues(emptyForm())
+    setErrors({})
+    setRequestError('')
+    setIsFormOpen(true)
+  }
+
+  function openEditForm(transaction: TransactionResponse) {
+    setEditingTransactionId(transaction.id)
+    setValues({
+      type: transaction.type,
+      amount: String(transaction.amount),
+      date: transaction.date.slice(0, 10),
+      categoryId: transaction.categoryId,
+      description: transaction.description ?? '',
+    })
     setErrors({})
     setRequestError('')
     setIsFormOpen(true)
@@ -132,6 +157,7 @@ export default function TransactionsPage() {
     if (isSaving) return
 
     setIsFormOpen(false)
+    setEditingTransactionId(null)
     setErrors({})
     setRequestError('')
   }
@@ -139,39 +165,75 @@ export default function TransactionsPage() {
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
 
+    if (submitLock.current) return
+
     const validationErrors = validate(values)
     setErrors(validationErrors)
 
-    if (Object.keys(validationErrors).length > 0) {
-      return
-    }
+    if (Object.keys(validationErrors).length > 0) return
 
+    submitLock.current = true
     setIsSaving(true)
     setRequestError('')
 
-    try {
-      const savedTransaction = await createTransaction({
-        amount: Number(values.amount.replace(',', '.')),
-        date: values.date,
-        type: values.type,
-        description: values.description.trim() || null,
-        categoryId: values.categoryId,
-      })
+    const request = {
+      amount: Number(values.amount.replace(',', '.')),
+      date: values.date,
+      type: values.type,
+      description: values.description.trim() || null,
+      categoryId: values.categoryId,
+    }
 
-      setTransactions((current) => [savedTransaction, ...current])
+    try {
+      let savedTransaction: TransactionResponse
+
+      if (editingTransactionId) {
+        savedTransaction = await updateTransaction(
+          editingTransactionId,
+          request,
+        )
+
+        setTransactions((current) =>
+          current.map((transaction) =>
+            transaction.id === savedTransaction.id
+              ? savedTransaction
+              : transaction,
+          ),
+        )
+      } else {
+        savedTransaction = await createTransaction(request)
+        setTransactions((current) => [savedTransaction, ...current])
+      }
+
       setIsFormOpen(false)
+      setEditingTransactionId(null)
       setValues(emptyForm())
       setErrors({})
+
+      // Seznam ponovno preberemo iz strežnika, da prikažemo shranjene podatke.
+      try {
+        const refreshedTransactions = await getTransactions()
+        setTransactions(refreshedTransactions)
+        setRefreshError('')
+      } catch (error) {
+        setRefreshError(
+          getErrorMessage(
+            error,
+            'Transakcija je shranjena, seznama pa ni bilo mogoče osvežiti.',
+          ),
+        )
+      }
     } catch (error) {
       setRequestError(
-        error instanceof Error
-          ? error.message
-          : 'Transakcije ni bilo mogoče shraniti.',
+        getErrorMessage(error, 'Transakcije ni bilo mogoče shraniti.'),
       )
     } finally {
+      submitLock.current = false
       setIsSaving(false)
     }
   }
+
+  const isEditing = editingTransactionId !== null
 
   return (
     <main className="transactions-page">
@@ -184,13 +246,20 @@ export default function TransactionsPage() {
         <button
           className="transactions-primary-button"
           type="button"
-          onClick={openForm}
+          onClick={openCreateForm}
+          disabled={isSaving}
         >
           + Nova transakcija
         </button>
       </header>
 
       <section className="transactions-table-card" aria-label="Transakcije">
+        {refreshError && (
+          <p className="transaction-request-error" role="alert">
+            {refreshError}
+          </p>
+        )}
+
         {isLoading ? (
           <p className="transactions-empty">Nalagam transakcije …</p>
         ) : loadError ? (
@@ -210,8 +279,8 @@ export default function TransactionsPage() {
                   <th>Opis</th>
                   <th>Kategorija</th>
                   <th>Vrsta</th>
-                  <th className = "transactions-amount-column">Znesek</th>
-                  <th className = 'transactions-actions-column'>Dejanja</th>
+                  <th className="transactions-amount-column">Znesek</th>
+                  <th className="transactions-actions-column">Dejanja</th>
                 </tr>
               </thead>
 
@@ -234,20 +303,22 @@ export default function TransactionsPage() {
                       <td className="transactions-amount-column">
                         {formatAmount(transaction.amount, transaction.type)}
                       </td>
-                      <td className = 'transaction-actions-column'>
-                        <div className = 'transaction-action-buttons'>
+                      <td className="transactions-actions-column">
+                        <div className="transaction-action-buttons">
                           <button
-                            className = 'transaction-edit-button'
-                            type='button'
-                            onClick={() => console.log("Uredi transakcijo.")}
+                            className="transaction-edit-button"
+                            type="button"
+                            onClick={() => openEditForm(transaction)}
+                            disabled={isSaving}
                           >
                             Uredi
                           </button>
 
                           <button
-                            className = 'transaction-delete-button'
-                            type='button'
-                            onClick={() => console.log("Zbrisi transakcijo.")}
+                            className="transaction-delete-button"
+                            type="button"
+                            onClick={() => console.log('Zbriši transakcijo.')}
+                            disabled={isSaving}
                           >
                             Zbriši
                           </button>
@@ -269,7 +340,9 @@ export default function TransactionsPage() {
             aria-labelledby="transaction-form-title"
           >
             <div className="transaction-form-heading">
-              <h2 id="transaction-form-title">Nova transakcija</h2>
+              <h2 id="transaction-form-title">
+                {isEditing ? 'Uredi transakcijo' : 'Nova transakcija'}
+              </h2>
 
               <button
                 className="transaction-close-button"
@@ -292,6 +365,7 @@ export default function TransactionsPage() {
                       : 'transaction-type-button'
                   }
                   onClick={() => updateField('type', 'EXPENSE')}
+                  disabled={isSaving}
                 >
                   Strošek
                 </button>
@@ -304,6 +378,7 @@ export default function TransactionsPage() {
                       : 'transaction-type-button'
                   }
                   onClick={() => updateField('type', 'INCOME')}
+                  disabled={isSaving}
                 >
                   Prihodek
                 </button>
@@ -322,6 +397,7 @@ export default function TransactionsPage() {
                     updateField('amount', event.target.value)
                   }
                   aria-invalid={Boolean(errors.amount)}
+                  disabled={isSaving}
                 />
                 {errors.amount && (
                   <small className="transaction-field-error">
@@ -337,6 +413,7 @@ export default function TransactionsPage() {
                   value={values.date}
                   onChange={(event) => updateField('date', event.target.value)}
                   aria-invalid={Boolean(errors.date)}
+                  disabled={isSaving}
                 />
                 {errors.date && (
                   <small className="transaction-field-error">
@@ -353,7 +430,7 @@ export default function TransactionsPage() {
                     updateField('categoryId', event.target.value)
                   }
                   aria-invalid={Boolean(errors.categoryId)}
-                  disabled={categories.length === 0}
+                  disabled={isSaving || categories.length === 0}
                 >
                   <option value="">Izberite kategorijo</option>
                   {categories.map((category) => (
@@ -378,6 +455,7 @@ export default function TransactionsPage() {
                   onChange={(event) =>
                     updateField('description', event.target.value)
                   }
+                  disabled={isSaving}
                 />
               </label>
 
@@ -393,7 +471,11 @@ export default function TransactionsPage() {
                   type="submit"
                   disabled={isSaving || categories.length === 0}
                 >
-                  {isSaving ? 'Shranjujem …' : 'Shrani'}
+                  {isSaving
+                    ? 'Shranjujem …'
+                    : isEditing
+                      ? 'Shrani spremembe'
+                      : 'Shrani'}
                 </button>
 
                 <button
