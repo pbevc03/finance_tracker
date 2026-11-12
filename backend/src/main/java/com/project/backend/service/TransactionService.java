@@ -28,7 +28,9 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse create(CreateTransactionRequest request, UUID userId) {
-        Category category = categoryDAO.findById(request.categoryId()).orElseThrow(() -> new CategoryNotFoundException(request.categoryId()));
+        Category category = categoryDAO
+                .findById(request.categoryId())
+                .orElseThrow(() -> new CategoryNotFoundException(request.categoryId()));
 
         Transaction transaction = new Transaction(
                 userId,
@@ -70,8 +72,12 @@ public class TransactionService {
 
     @Transactional
     public TransactionResponse editTransaction(UUID transactionId, UpdateTransactionRequest request, UUID userId) {
-        Transaction transaction = transactionRepository.findByIdAndUserId(transactionId, userId).orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + transactionId));
-        Category category = categoryDAO.findById(request.categoryId()).orElseThrow(() -> new CategoryNotFoundException(request.categoryId()));
+        Transaction transaction = transactionRepository
+                .findByIdAndUserId(transactionId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Transaction not found with id: " + transactionId));
+        Category category = categoryDAO
+                .findById(request.categoryId())
+                .orElseThrow(() -> new CategoryNotFoundException(request.categoryId()));
 
         if (!transaction.getUserId().equals(userId)) {
             throw new AccessDeniedException("You are not allowed to edit this transaction");
@@ -94,5 +100,16 @@ public class TransactionService {
                 saved.getCategory().getId(),
                 saved.getCreatedAt()
         );
+    }
+
+    @Transactional
+    public void deleteTransaction(UUID transactionId, UUID userId) {
+        Transaction transaction = transactionRepository
+                .findByIdAndUserId(transactionId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Transaction not found with id: " + transactionId
+                ));
+
+        transactionRepository.delete(transaction);
     }
 }
