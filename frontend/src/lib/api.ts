@@ -27,6 +27,8 @@ export type CreateTransactionRequest = {
   categoryId: string
 }
 
+export type UpdateTransactionRequest = CreateTransactionRequest
+
 async function apiRequest<T>(
   path: string,
   options: RequestInit = {},
@@ -59,8 +61,11 @@ async function apiRequest<T>(
 
   if (!response.ok) {
     const errorBody = await response.json().catch(() => null)
+
     throw new Error(
-      errorBody?.message ?? `Napaka strežnika (${response.status}).`,
+      errorBody?.message ??
+        errorBody?.detail ??
+        `Napaka strežnika (${response.status}).`,
     )
   }
 
@@ -75,9 +80,24 @@ export function getTransactions(): Promise<TransactionResponse[]> {
   return apiRequest<TransactionResponse[]>('/api/transactions')
 }
 
-export function createTransaction(transaction: CreateTransactionRequest,): Promise<TransactionResponse> {
+export function createTransaction(
+  transaction: CreateTransactionRequest,
+): Promise<TransactionResponse> {
   return apiRequest<TransactionResponse>('/api/transactions/create', {
     method: 'POST',
     body: JSON.stringify(transaction),
   })
+}
+
+export function updateTransaction(
+  transactionId: string,
+  transaction: UpdateTransactionRequest,
+): Promise<TransactionResponse> {
+  return apiRequest<TransactionResponse>(
+    `/api/transactions/edit/${transactionId}`,
+    {
+      method: 'PUT',
+      body: JSON.stringify(transaction),
+    },
+  )
 }

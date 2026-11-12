@@ -141,6 +141,13 @@
   background: #bd3030;
 }
 
+.transaction-edit-button:disabled,
+.transaction-delete-button:disabled,
+.transaction-type-button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+
 .transactions-empty {
   display: grid;
   min-height: 210px;
