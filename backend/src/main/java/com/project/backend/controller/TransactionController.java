@@ -28,7 +28,10 @@ public class TransactionController {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<TransactionResponse> create(@Valid @RequestBody CreateTransactionRequest request, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<TransactionResponse> create(
+            @Valid @RequestBody CreateTransactionRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
         UUID userId = UUID.fromString(jwt.getSubject());
         TransactionResponse response = transactionService.create(request, userId);
 
@@ -36,10 +39,25 @@ public class TransactionController {
     }
 
     @PutMapping("/edit/{transactionId}")
-    public ResponseEntity<TransactionResponse> editTransaction(@PathVariable UUID transactionId, @Valid @RequestBody UpdateTransactionRequest request, @AuthenticationPrincipal Jwt jwt) {
+    public ResponseEntity<TransactionResponse> editTransaction(
+            @PathVariable UUID transactionId,
+            @Valid @RequestBody UpdateTransactionRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
         UUID userId = UUID.fromString(jwt.getSubject());
         TransactionResponse response = transactionService.editTransaction(transactionId, request, userId);
 
         return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
+    @DeleteMapping("/delete/{transactionId}")
+    public ResponseEntity<Void> deleteTransaction(
+            @PathVariable UUID transactionId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        transactionService.deleteTransaction(transactionId, userId);
+
+        return ResponseEntity.noContent().build();
     }
 }

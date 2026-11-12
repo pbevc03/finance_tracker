@@ -1,6 +1,7 @@
 import { type SyntheticEvent, useEffect, useRef, useState } from 'react'
 import {
   createTransaction,
+  deleteTransaction,
   getCategories,
   getTransactions,
   updateTransaction,
@@ -84,6 +85,10 @@ export default function TransactionsPage() {
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
   const [refreshError, setRefreshError] = useState('')
+  const [deleteError, setDeleteError] = useState('')
+  const [deletingTransactionId, setDeletingTransactionId] = useState<
+    string | null
+  >(null)
 
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [editingTransactionId, setEditingTransactionId] = useState<string | null>(
@@ -96,6 +101,7 @@ export default function TransactionsPage() {
 
   // Ref zaklene oddajo takoj, še preden React izriše disabled gumb.
   const submitLock = useRef(false)
+  const deleteLock = useRef(false)
 
   useEffect(() => {
     async function loadData() {
@@ -162,6 +168,36 @@ export default function TransactionsPage() {
     setRequestError('')
   }
 
+  async function handleDelete(transaction: TransactionResponse) {
+    if (deleteLock.current) return
+
+    const confirmed = window.confirm(
+      'Ali res želite izbrisati to transakcijo?',
+    )
+
+    if (!confirmed) return
+
+    deleteLock.current = true
+    setDeletingTransactionId(transaction.id)
+    setDeleteError('')
+
+    try {
+      await deleteTransaction(transaction.id)
+
+      setTransactions((current) =>
+        current.filter((item) => item.id !== transaction.id),
+      )
+      setRefreshError('')
+    } catch (error) {
+      setDeleteError(
+        getErrorMessage(error, 'Transakcije ni bilo mogoče izbrisati.'),
+      )
+    } finally {
+      deleteLock.current = false
+      setDeletingTransactionId(null)
+    }
+  }
+
   async function handleSubmit(event: SyntheticEvent<HTMLFormElement>) {
     event.preventDefault()
 
@@ -210,7 +246,7 @@ export default function TransactionsPage() {
       setValues(emptyForm())
       setErrors({})
 
-      // Seznam ponovno preberemo iz strežnika, da prikažemo shranjene podatke.
+      // Osvežimo seznam iz strežnika, da prikažemo shranjene podatke.
       try {
         const refreshedTransactions = await getTransactions()
         setTransactions(refreshedTransactions)
@@ -234,6 +270,7 @@ export default function TransactionsPage() {
   }
 
   const isEditing = editingTransactionId !== null
+  const isDeleting = deletingTransactionId !== null
 
   return (
     <main className="transactions-page">
@@ -247,7 +284,7 @@ export default function TransactionsPage() {
           className="transactions-primary-button"
           type="button"
           onClick={openCreateForm}
-          disabled={isSaving}
+          disabled={isSaving || isDeleting}
         >
           + Nova transakcija
         </button>
@@ -257,6 +294,12 @@ export default function TransactionsPage() {
         {refreshError && (
           <p className="transaction-request-error" role="alert">
             {refreshError}
+          </p>
+        )}
+
+        {deleteError && (
+          <p className="transaction-request-error" role="alert">
+            {deleteError}
           </p>
         )}
 
@@ -309,7 +352,7 @@ export default function TransactionsPage() {
                             className="transaction-edit-button"
                             type="button"
                             onClick={() => openEditForm(transaction)}
-                            disabled={isSaving}
+                            disabled={isSaving || isDeleting}
                           >
                             Uredi
                           </button>
@@ -317,10 +360,12 @@ export default function TransactionsPage() {
                           <button
                             className="transaction-delete-button"
                             type="button"
-                            onClick={() => console.log('Zbriši transakcijo.')}
-                            disabled={isSaving}
+                            onClick={() => void handleDelete(transaction)}
+                            disabled={isSaving || isDeleting}
                           >
-                            Zbriši
+                            {deletingTransactionId === transaction.id
+                              ? 'Brišem …'
+                              : 'Zbriši'}
                           </button>
                         </div>
                       </td>
