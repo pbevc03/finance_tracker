@@ -69,6 +69,11 @@ async function apiRequest<T>(
     )
   }
 
+  // DELETE endpoint vrne 204 No Content, zato tu ne kličemo response.json().
+  if (response.status === 204) {
+    return undefined as T
+  }
+
   return response.json() as Promise<T>
 }
 
@@ -100,4 +105,10 @@ export function updateTransaction(
       body: JSON.stringify(transaction),
     },
   )
+}
+
+export function deleteTransaction(transactionId: string): Promise<void> {
+  return apiRequest<void>(`/api/transactions/delete/${transactionId}`, {
+    method: 'DELETE',
+  })
 }
