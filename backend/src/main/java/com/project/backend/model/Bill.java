@@ -46,7 +46,7 @@ public class Bill {
     private BillStatus status = BillStatus.UNPAID;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "category_id", nullable = false)
+    @JoinColumn(name = "category_id", nullable = true)
     private Category category;
 
     @Column(length = 1000)
@@ -59,7 +59,7 @@ public class Bill {
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
 
-    protected Bill() {
+    public Bill() {
     }
 
     @PrePersist
