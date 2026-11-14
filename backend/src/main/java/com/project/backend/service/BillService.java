@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -50,6 +51,14 @@ public class BillService {
 
         Bill saved = billDAO.save(bill);
         return toResponse(saved);
+    }
+
+    @Transactional
+    public List<BillResponse> findAllByUserId(UUID userId) {
+        return billDAO.findAllByUserId(userId)
+                .stream()
+                .map(this::toResponse)
+                .toList();
     }
 
     private BillResponse toResponse(Bill bill) {
