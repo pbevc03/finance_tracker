@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -20,5 +21,9 @@ public class BillDAO {
 
     public List<Bill> findAllByUserId(UUID userId) {
         return billRepository.findAllByUserIdOrderByDueDateAsc(userId);
+    }
+
+    public Optional<Bill> findByIdAndUserIdForUpdate(UUID billId, UUID userId) {
+        return billRepository.findByIdAndUserIdForUpdate(billId, userId);
     }
 }

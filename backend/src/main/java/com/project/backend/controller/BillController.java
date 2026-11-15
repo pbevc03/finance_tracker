@@ -2,6 +2,7 @@ package com.project.backend.controller;
 
 import com.project.backend.dto.bill.BillResponse;
 import com.project.backend.dto.bill.CreateBillRequest;
+import com.project.backend.dto.bill.PayBillRequest;
 import com.project.backend.service.BillService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -37,5 +38,17 @@ public class BillController {
     ){
         UUID userId = UUID.fromString(jwt.getSubject());
         return billService.findAllByUserId(userId);
+    }
+
+    @PostMapping("/{billId}/pay")
+    public ResponseEntity<BillResponse> markAsPaid(
+            @PathVariable UUID billId,
+            @Valid @RequestBody PayBillRequest request,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        BillResponse response = billService.markAsPaid(billId, request, userId);
+
+        return ResponseEntity.ok(response);
     }
 }
