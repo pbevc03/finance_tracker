@@ -48,8 +48,8 @@ public class Bill {
     @Column(nullable = false, length = 20)
     private BillStatus status = BillStatus.UNPAID;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "category_id", nullable = true)
+    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
     @Column(length = 1000)
