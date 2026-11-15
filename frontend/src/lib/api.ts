@@ -29,6 +29,29 @@ export type CreateTransactionRequest = {
 
 export type UpdateTransactionRequest = CreateTransactionRequest
 
+export type BillStatus = 'UNPAID' | 'PAID' | 'EXPIRED'
+
+export type BillResponse = {
+  id: string
+  issuer: string
+  amount: number
+  issueDate: string
+  dueDate: string
+  status: BillStatus
+  categoryId: string | null
+  description: string | null
+  transactionId: string | null
+}
+
+export type CreateBillRequest = {
+  issuer: string
+  amount: number
+  issueDate: string
+  dueDate: string
+  categoryId: string | null
+  description: string | null
+}
+
 async function apiRequest<T>(
   path: string,
   options: RequestInit = {},
@@ -110,5 +133,17 @@ export function updateTransaction(
 export function deleteTransaction(transactionId: string): Promise<void> {
   return apiRequest<void>(`/api/transactions/delete/${transactionId}`, {
     method: 'DELETE',
+  })
+}
+
+
+export function getBills(): Promise<BillResponse[]> {
+  return apiRequest<BillResponse[]>('/api/bills/getAll')
+}
+
+export function createBill(bill: CreateBillRequest): Promise<BillResponse> {
+  return apiRequest<BillResponse>('/api/bills/create', {
+    method: 'POST',
+    body: JSON.stringify(bill),
   })
 }

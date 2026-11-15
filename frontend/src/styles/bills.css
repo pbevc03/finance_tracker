@@ -1,0 +1,279 @@
+.bills-page {
+  min-width: 0;
+  padding: 32px clamp(20px, 3vw, 56px);
+  color: #24272b;
+}
+
+.bills-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.bills-header h1 {
+  margin: 0;
+  font-size: clamp(30px, 3vw, 42px);
+}
+
+.bills-header p {
+  margin: 6px 0 0;
+  color: #6d716f;
+}
+
+.bills-primary-button,
+.bills-secondary-button {
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid #24272b;
+  border-radius: 8px;
+  background: #fff;
+  color: #24272b;
+  cursor: pointer;
+}
+
+.bills-primary-button {
+  border-color: #3158d5;
+  background: #3158d5;
+  color: #fff;
+}
+
+.bills-primary-button:disabled,
+.bills-secondary-button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+.bills-summary {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+  margin-bottom: 28px;
+}
+
+.bills-summary-card,
+.bills-table-card {
+  border: 1px solid #d4d5d1;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.bills-summary-card {
+  display: grid;
+  gap: 22px;
+  padding: 24px;
+  color: #666b68;
+}
+
+.bills-summary-card strong {
+  color: #24272b;
+  font-size: 32px;
+}
+
+.bills-table-card {
+  padding: 20px 24px;
+}
+
+.bills-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid #d4d5d1;
+}
+
+.bills-tab {
+  padding: 12px 18px;
+  border: 0;
+  border-bottom: 3px solid transparent;
+  background: transparent;
+  color: #454945;
+  cursor: pointer;
+}
+
+.bills-tab.is-active {
+  border-bottom-color: #3158d5;
+  color: #24272b;
+  font-weight: 700;
+}
+
+.bills-table-scroll {
+  overflow-x: auto;
+}
+
+.bills-table {
+  width: 100%;
+  border-collapse: collapse;
+  white-space: nowrap;
+}
+
+.bills-table th,
+.bills-table td {
+  padding: 18px 14px;
+  border-bottom: 1px solid #e1e2de;
+  text-align: left;
+}
+
+.bills-table th {
+  color: #666b68;
+  font-weight: 650;
+}
+
+.bills-table .numeric {
+  text-align: right;
+}
+
+.bill-status {
+  display: inline-block;
+  padding: 5px 12px;
+  border: 1px solid #9b9d98;
+  border-radius: 999px;
+}
+
+.bill-status--paid {
+  border-color: #4a8058;
+  background: #e7f1e9;
+  color: #285536;
+}
+
+.bill-status--expired {
+  border-color: #d45c00;
+  background: #fff0e4;
+  color: #9a4300;
+}
+
+.bills-message {
+  padding: 30px 4px;
+  color: #666b68;
+}
+
+.bills-error {
+  padding: 12px 14px;
+  border: 1px solid #d45c00;
+  border-radius: 8px;
+  color: #923f00;
+  background: #fff0e4;
+}
+
+.bills-modal-backdrop {
+  position: fixed;
+  z-index: 10;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgb(20 24 30 / 45%);
+}
+
+.bills-modal {
+  width: min(100%, 620px);
+  padding: 26px;
+  border: 1px solid #d4d5d1;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 20px 60px rgb(0 0 0 / 18%);
+}
+
+.bills-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.bills-modal-header h2 {
+  margin: 0;
+}
+
+.bills-close-button {
+  border: 0;
+  background: transparent;
+  font-size: 28px;
+  cursor: pointer;
+}
+
+.bill-field {
+  display: grid;
+  gap: 7px;
+  margin-bottom: 16px;
+  font-weight: 600;
+}
+
+.bill-field input,
+.bill-field select,
+.bill-field textarea {
+  width: 100%;
+  min-height: 48px;
+  padding: 10px 12px;
+  border: 1px solid #a7aaa4;
+  border-radius: 7px;
+  background: #fff;
+  color: #24272b;
+}
+
+.bill-field textarea {
+  resize: vertical;
+}
+
+.bill-field input[aria-invalid="true"] {
+  border-color: #c45100;
+}
+
+.bill-field small {
+  color: #a34600;
+  font-weight: 400;
+}
+
+.bill-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0 16px;
+}
+
+.bills-form-actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.bills-form-note {
+  margin: 16px 0 0;
+  color: #6d716f;
+  font-size: 13px;
+}
+
+@media (max-width: 700px) {
+  .bills-page {
+    padding: 22px 16px;
+  }
+
+  .bills-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .bills-summary {
+    gap: 12px;
+  }
+
+  .bills-summary-card {
+    padding: 16px;
+  }
+
+  .bills-summary-card strong {
+    font-size: 23px;
+  }
+
+  .bills-table-card {
+    padding: 14px;
+  }
+
+  .bills-table th,
+  .bills-table td {
+    padding: 13px 10px;
+  }
+
+  .bill-form-grid {
+    grid-template-columns: 1fr;
+  }
+}
