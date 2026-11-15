@@ -5,6 +5,7 @@ import LoginPage from "../features/pages/login_page"
 import TransactionsPage from "../features/pages/transaction_page";
 import AppLayout from "../layouts/appLayout";
 import ComingSoonPage from "../features/pages/comingSoon_page";
+import BillsPage from "../features/pages/bills_page";
 
 function App() {
   return (
@@ -15,7 +16,7 @@ function App() {
           <Route element={<AppLayout />}>
             <Route path='/dashboard' element={<ComingSoonPage title='Dashboard' />}/>
             <Route path='/transactions' element={<TransactionsPage />}/>
-            <Route path='/bills' element={<ComingSoonPage title='Bills' />}/>
+            <Route path='/bills' element={<BillsPage />}/>
             <Route path='/budget' element={<ComingSoonPage title='Budget' />}/>
             <Route path='/statistics' element={<ComingSoonPage title='Statistics' />}/>
           </Route>
