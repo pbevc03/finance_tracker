@@ -37,6 +37,7 @@ export type BillResponse = {
   amount: number
   issueDate: string
   dueDate: string
+  paymentDate: string
   status: BillStatus
   categoryId: string | null
   description: string | null
@@ -50,6 +51,10 @@ export type CreateBillRequest = {
   dueDate: string
   categoryId: string | null
   description: string | null
+}
+
+export type PayBillRequest = {
+  paymentDate: string
 }
 
 async function apiRequest<T>(
@@ -145,5 +150,15 @@ export function createBill(bill: CreateBillRequest): Promise<BillResponse> {
   return apiRequest<BillResponse>('/api/bills/create', {
     method: 'POST',
     body: JSON.stringify(bill),
+  })
+}
+
+export function markBillAsPaid(
+  billId: string,
+  paymentDate: string,
+): Promise<BillResponse> {
+  return apiRequest<BillResponse>(`/api/bills/${billId}/pay`, {
+    method: 'POST',
+    body: JSON.stringify({ paymentDate } satisfies PayBillRequest),
   })
 }

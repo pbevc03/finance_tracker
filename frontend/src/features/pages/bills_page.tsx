@@ -3,6 +3,7 @@ import {
   createBill,
   getBills,
   getCategories,
+  markBillAsPaid,
   type BillResponse,
   type BillStatus,
   type CategoryResponse,
@@ -63,6 +64,7 @@ function validate(values: FormValues): FormErrors {
   const amount = Number(values.amount.replace(',', '.'))
 
   if (!values.issuer.trim()) errors.issuer = 'Izdajatelj je obvezen.'
+
   if (!values.amount.trim()) {
     errors.amount = 'Znesek je obvezen.'
   } else if (!Number.isFinite(amount) || amount <= 0) {
@@ -70,6 +72,7 @@ function validate(values: FormValues): FormErrors {
   }
 
   if (!values.issueDate) errors.issueDate = 'Datum izdaje je obvezen.'
+
   if (!values.dueDate) {
     errors.dueDate = 'Datum zapadlosti je obvezen.'
   } else if (values.issueDate && values.dueDate < values.issueDate) {
@@ -89,11 +92,17 @@ export default function BillsPage() {
   const [filter, setFilter] = useState<BillFilter>('UNPAID')
   const [isLoading, setIsLoading] = useState(true)
   const [loadError, setLoadError] = useState('')
+
   const [isFormOpen, setIsFormOpen] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [requestError, setRequestError] = useState('')
   const [values, setValues] = useState<FormValues>(emptyForm())
   const [errors, setErrors] = useState<FormErrors>({})
+
+  const [billToPay, setBillToPay] = useState<BillResponse | null>(null)
+  const [paymentDate, setPaymentDate] = useState(today)
+  const [paymentError, setPaymentError] = useState('')
+  const [isPaying, setIsPaying] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -105,6 +114,7 @@ export default function BillsPage() {
           getBills(),
           getCategories(),
         ])
+
         setBills(loadedBills)
         setCategories(loadedCategories)
       } catch (error) {
@@ -162,6 +172,7 @@ export default function BillsPage() {
 
     const validationErrors = validate(values)
     setErrors(validationErrors)
+
     if (Object.keys(validationErrors).length > 0) return
 
     setIsSaving(true)
@@ -192,6 +203,44 @@ export default function BillsPage() {
     }
   }
 
+  function openPaymentConfirmation(bill: BillResponse) {
+    setBillToPay(bill)
+    setPaymentDate(today())
+    setPaymentError('')
+  }
+
+  function cancelPayment() {
+    if (isPaying) return
+
+    setBillToPay(null)
+    setPaymentError('')
+  }
+
+  async function handlePaymentSubmit(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    if (!billToPay || !paymentDate || isPaying) return
+
+    setIsPaying(true)
+    setPaymentError('')
+
+    try {
+      const updatedBill = await markBillAsPaid(billToPay.id, paymentDate)
+
+      setBills((current) =>
+        current.map((bill) =>
+          bill.id === updatedBill.id ? updatedBill : bill,
+        ),
+      )
+
+      setBillToPay(null)
+    } catch (error) {
+      setPaymentError(errorMessage(error))
+    } finally {
+      setIsPaying(false)
+    }
+  }
+
   return (
     <section className="bills-page">
       <header className="bills-header">
@@ -199,7 +248,12 @@ export default function BillsPage() {
           <h1>Računi</h1>
           <p>Finančne obveznosti in njihov status plačila</p>
         </div>
-        <button className="bills-primary-button" onClick={openForm}>
+
+        <button
+          className="bills-primary-button"
+          type="button"
+          onClick={openForm}
+        >
           + Dodaj račun ročno
         </button>
       </header>
@@ -209,6 +263,7 @@ export default function BillsPage() {
           <span>Skupaj neplačano</span>
           <strong>{formatAmount(unpaidTotal)}</strong>
         </article>
+
         <article className="bills-summary-card">
           <span>Skupaj plačano</span>
           <strong>{formatAmount(paidTotal)}</strong>
@@ -217,13 +272,16 @@ export default function BillsPage() {
 
       <section className="bills-table-card" aria-label="Seznam računov">
         <nav className="bills-tabs" aria-label="Filter računov">
-          {([
-            ['UNPAID', 'Neplačani'],
-            ['PAID', 'Plačani'],
-            ['ALL', 'Vsi'],
-          ] as const).map(([value, label]) => (
+          {(
+            [
+              ['UNPAID', 'Neplačani'],
+              ['PAID', 'Plačani'],
+              ['ALL', 'Vsi'],
+            ] as const
+          ).map(([value, label]) => (
             <button
               key={value}
+              type="button"
               className={filter === value ? 'bills-tab is-active' : 'bills-tab'}
               onClick={() => setFilter(value)}
             >
@@ -235,7 +293,9 @@ export default function BillsPage() {
         {isLoading ? (
           <p className="bills-message">Nalagam račune …</p>
         ) : loadError ? (
-          <p className="bills-error" role="alert">{loadError}</p>
+          <p className="bills-error" role="alert">
+            {loadError}
+          </p>
         ) : visibleBills.length === 0 ? (
           <p className="bills-message">Računov za ta filter še ni.</p>
         ) : (
@@ -249,8 +309,10 @@ export default function BillsPage() {
                   <th>Zapadlost</th>
                   <th>Status</th>
                   <th className="numeric">Znesek</th>
+                  <th>Dejanja</th>
                 </tr>
               </thead>
+
               <tbody>
                 {visibleBills.map((bill) => {
                   const category = categories.find(
@@ -264,11 +326,27 @@ export default function BillsPage() {
                       <td>{formatDate(bill.issueDate)}</td>
                       <td>{formatDate(bill.dueDate)}</td>
                       <td>
-                        <span className={`bill-status bill-status--${bill.status.toLowerCase()}`}>
+                        <span
+                          className={`bill-status bill-status--${bill.status.toLowerCase()}`}
+                        >
                           {statusLabel(bill.status)}
+                          {bill.status === 'PAID' && bill.paymentDate
+                            ? ` ${formatDate(bill.paymentDate)}`
+                            : ''}
                         </span>
                       </td>
                       <td className="numeric">{formatAmount(bill.amount)}</td>
+                      <td>
+                        {bill.status === 'UNPAID' && (
+                          <button
+                            type="button"
+                            className="bills-primary-button"
+                            onClick={() => openPaymentConfirmation(bill)}
+                          >
+                            Označi kot plačan
+                          </button>
+                        )}
+                      </td>
                     </tr>
                   )
                 })}
@@ -288,6 +366,7 @@ export default function BillsPage() {
           >
             <div className="bills-modal-header">
               <h2 id="bill-form-title">Nov račun</h2>
+
               <button
                 type="button"
                 className="bills-close-button"
@@ -304,7 +383,9 @@ export default function BillsPage() {
                 <span>Izdajatelj *</span>
                 <input
                   value={values.issuer}
-                  onChange={(event) => updateField('issuer', event.target.value)}
+                  onChange={(event) =>
+                    updateField('issuer', event.target.value)
+                  }
                   aria-invalid={Boolean(errors.issuer)}
                 />
                 {errors.issuer && <small>{errors.issuer}</small>}
@@ -318,7 +399,9 @@ export default function BillsPage() {
                     min="0.01"
                     step="0.01"
                     value={values.amount}
-                    onChange={(event) => updateField('amount', event.target.value)}
+                    onChange={(event) =>
+                      updateField('amount', event.target.value)
+                    }
                     aria-invalid={Boolean(errors.amount)}
                   />
                   {errors.amount && <small>{errors.amount}</small>}
@@ -328,7 +411,9 @@ export default function BillsPage() {
                   <span>Kategorija</span>
                   <select
                     value={values.categoryId}
-                    onChange={(event) => updateField('categoryId', event.target.value)}
+                    onChange={(event) =>
+                      updateField('categoryId', event.target.value)
+                    }
                   >
                     <option value="">Brez kategorije</option>
                     {categories.map((category) => (
@@ -344,7 +429,9 @@ export default function BillsPage() {
                   <input
                     type="date"
                     value={values.issueDate}
-                    onChange={(event) => updateField('issueDate', event.target.value)}
+                    onChange={(event) =>
+                      updateField('issueDate', event.target.value)
+                    }
                     aria-invalid={Boolean(errors.issueDate)}
                   />
                   {errors.issueDate && <small>{errors.issueDate}</small>}
@@ -355,7 +442,9 @@ export default function BillsPage() {
                   <input
                     type="date"
                     value={values.dueDate}
-                    onChange={(event) => updateField('dueDate', event.target.value)}
+                    onChange={(event) =>
+                      updateField('dueDate', event.target.value)
+                    }
                     aria-invalid={Boolean(errors.dueDate)}
                   />
                   {errors.dueDate && <small>{errors.dueDate}</small>}
@@ -367,12 +456,16 @@ export default function BillsPage() {
                 <textarea
                   rows={3}
                   value={values.description}
-                  onChange={(event) => updateField('description', event.target.value)}
+                  onChange={(event) =>
+                    updateField('description', event.target.value)
+                  }
                 />
               </label>
 
               {requestError && (
-                <p className="bills-error" role="alert">{requestError}</p>
+                <p className="bills-error" role="alert">
+                  {requestError}
+                </p>
               )}
 
               <div className="bills-form-actions">
@@ -383,6 +476,7 @@ export default function BillsPage() {
                 >
                   {isSaving ? 'Shranjujem …' : 'Shrani račun'}
                 </button>
+
                 <button
                   className="bills-secondary-button"
                   type="button"
@@ -392,9 +486,78 @@ export default function BillsPage() {
                   Prekliči
                 </button>
               </div>
+
               <p className="bills-form-note">
                 Novi račun bo shranjen s statusom Neplačan.
               </p>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {billToPay && (
+        <div className="bills-modal-backdrop">
+          <section
+            className="bills-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="payment-dialog-title"
+          >
+            <div className="bills-modal-header">
+              <h2 id="payment-dialog-title">Potrditev plačila</h2>
+
+              <button
+                type="button"
+                className="bills-close-button"
+                onClick={cancelPayment}
+                disabled={isPaying}
+                aria-label="Zapri potrditev"
+              >
+                ×
+              </button>
+            </div>
+
+            <p>
+              Račun <strong>{billToPay.issuer}</strong> bo označen kot plačan.
+              Ustvarila se bo odhodna transakcija v znesku{' '}
+              <strong>{formatAmount(billToPay.amount)}</strong>.
+            </p>
+
+            <form onSubmit={handlePaymentSubmit}>
+              <label className="bill-field">
+                <span>Datum plačila</span>
+                <input
+                  type="date"
+                  required
+                  value={paymentDate}
+                  onChange={(event) => setPaymentDate(event.target.value)}
+                />
+              </label>
+
+              {paymentError && (
+                <p className="bills-error" role="alert">
+                  {paymentError}
+                </p>
+              )}
+
+              <div className="bills-form-actions">
+                <button
+                  type="submit"
+                  className="bills-primary-button"
+                  disabled={isPaying || !paymentDate}
+                >
+                  {isPaying ? 'Shranjujem …' : 'Potrdi plačilo'}
+                </button>
+
+                <button
+                  type="button"
+                  className="bills-secondary-button"
+                  onClick={cancelPayment}
+                  disabled={isPaying}
+                >
+                  Prekliči
+                </button>
+              </div>
             </form>
           </section>
         </div>
