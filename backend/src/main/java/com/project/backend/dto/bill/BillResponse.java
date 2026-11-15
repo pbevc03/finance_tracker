@@ -12,6 +12,7 @@ public record BillResponse(
         BigDecimal amount,
         LocalDate issueDate,
         LocalDate dueDate,
+        LocalDate paymentDate,
         BillStatus status,
         UUID categoryId,
         String description,

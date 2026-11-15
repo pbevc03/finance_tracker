@@ -41,6 +41,9 @@ public class Bill {
     @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
 
+    @Column(name = "payment_date")
+    private LocalDate paymentDate;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     private BillStatus status = BillStatus.UNPAID;
