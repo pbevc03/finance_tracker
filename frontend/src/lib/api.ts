@@ -162,3 +162,9 @@ export function markBillAsPaid(
     body: JSON.stringify({ paymentDate } satisfies PayBillRequest),
   })
 }
+
+export function deleteBill(billId: string): Promise<void> {
+  return apiRequest<void>(`/api/bills/${billId}/delete`, {
+    method: 'DELETE',
+  })
+}
