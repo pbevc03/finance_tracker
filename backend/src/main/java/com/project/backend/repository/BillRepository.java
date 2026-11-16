@@ -20,7 +20,7 @@ public interface BillRepository extends JpaRepository<Bill, UUID> {
     left join fetch b.category
     where b.id = :billId and b.userId = :userId
     """)
-    Optional<Bill> findByIdAndUserIdForUpdate(
+    Optional<Bill> findByIdAndUserIdForUpdateDelete(
             @Param("billId") UUID billId,
             @Param("userId") UUID userId
     );

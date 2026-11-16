@@ -1,6 +1,7 @@
 import { type SubmitEvent, useEffect, useMemo, useState } from 'react'
 import {
   createBill,
+  deleteBill,
   getBills,
   getCategories,
   markBillAsPaid,
@@ -103,6 +104,10 @@ export default function BillsPage() {
   const [paymentDate, setPaymentDate] = useState(today)
   const [paymentError, setPaymentError] = useState('')
   const [isPaying, setIsPaying] = useState(false)
+
+  const [billToDelete, setBillToDelete] = useState<BillResponse | null>(null)
+  const [deleteError, setDeleteError] = useState('')
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     async function load() {
@@ -241,6 +246,40 @@ export default function BillsPage() {
     }
   }
 
+  function openDeleteConfirmation(bill: BillResponse) {
+    setBillToDelete(bill)
+    setDeleteError('')
+  }
+
+  function cancelDelete() {
+    if (isDeleting) return
+
+    setBillToDelete(null)
+    setDeleteError('')
+  }
+
+  async function handleDeleteSubmit(event: SubmitEvent<HTMLFormElement>) {
+    event.preventDefault()
+
+    if (!billToDelete || isDeleting) return
+
+    setIsDeleting(true)
+    setDeleteError('')
+
+    try {
+      await deleteBill(billToDelete.id)
+
+      setBills((current) =>
+        current.filter((bill) => bill.id !== billToDelete.id),
+      )
+      setBillToDelete(null)
+    } catch (error) {
+      setDeleteError(errorMessage(error))
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   return (
     <section className="bills-page">
       <header className="bills-header">
@@ -309,7 +348,7 @@ export default function BillsPage() {
                   <th>Zapadlost</th>
                   <th>Status</th>
                   <th className="numeric">Znesek</th>
-                  <th>Dejanja</th>
+                  <th className="bills-actions-heading">Dejanja</th>
                 </tr>
               </thead>
 
@@ -336,16 +375,26 @@ export default function BillsPage() {
                         </span>
                       </td>
                       <td className="numeric">{formatAmount(bill.amount)}</td>
-                      <td>
-                        {bill.status === 'UNPAID' && (
+                      <td className="bills-actions-cell">
+                        <div className="bills-row-actions">
+                          {bill.status === 'UNPAID' && (
+                            <button
+                              type="button"
+                              className="bills-primary-button bills-row-button"
+                              onClick={() => openPaymentConfirmation(bill)}
+                            >
+                              Označi kot plačan
+                            </button>
+                          )}
+
                           <button
                             type="button"
-                            className="bills-primary-button"
-                            onClick={() => openPaymentConfirmation(bill)}
+                            className="bills-danger-button bills-row-button"
+                            onClick={() => openDeleteConfirmation(bill)}
                           >
-                            Označi kot plačan
+                            Izbriši
                           </button>
-                        )}
+                        </div>
                       </td>
                     </tr>
                   )
@@ -554,6 +603,67 @@ export default function BillsPage() {
                   className="bills-secondary-button"
                   onClick={cancelPayment}
                   disabled={isPaying}
+                >
+                  Prekliči
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+      )}
+
+      {billToDelete && (
+        <div className="bills-modal-backdrop">
+          <section
+            className="bills-modal bills-delete-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-dialog-title"
+          >
+            <div className="bills-modal-header">
+              <h2 id="delete-dialog-title">Izbriši račun?</h2>
+
+              <button
+                type="button"
+                className="bills-close-button"
+                onClick={cancelDelete}
+                disabled={isDeleting}
+                aria-label="Zapri potrditev"
+              >
+                ×
+              </button>
+            </div>
+
+            <p>
+              Ali želiš izbrisati račun <strong>{billToDelete.issuer}</strong>{' '}
+              v znesku <strong>{formatAmount(billToDelete.amount)}</strong>?
+            </p>
+
+            <p className="bills-form-note">
+              Plačanega računa, ki je povezan s transakcijo, ni mogoče izbrisati.
+            </p>
+
+            {deleteError && (
+              <p className="bills-error" role="alert">
+                {deleteError}
+              </p>
+            )}
+
+            <form onSubmit={handleDeleteSubmit}>
+              <div className="bills-form-actions">
+                <button
+                  type="submit"
+                  className="bills-danger-button"
+                  disabled={isDeleting}
+                >
+                  {isDeleting ? 'Brišem …' : 'Izbriši račun'}
+                </button>
+
+                <button
+                  type="button"
+                  className="bills-secondary-button"
+                  onClick={cancelDelete}
+                  disabled={isDeleting}
                 >
                   Prekliči
                 </button>

@@ -119,6 +119,25 @@ public class BillService {
         return toResponse(billDAO.save(bill));
     }
 
+    @Transactional
+    public void delete(UUID billId, UUID userId) {
+        Bill bill = billDAO.findByIdAndUserIdForUpdate(billId, userId)
+                .orElseThrow(() -> new ResponseStatusException(
+                        HttpStatus.NOT_FOUND,
+                        "Račun ni bil najden."
+                ));
+
+        if (bill.getStatus() == BillStatus.PAID
+                && bill.getTransaction() != null) {
+            throw new ResponseStatusException(
+                    HttpStatus.CONFLICT,
+                    "Plačanega računa s povezano transakcijo ni mogoče izbrisati."
+            );
+        }
+
+        billDAO.delete(bill);
+    }
+
     private BillResponse toResponse(Bill bill) {
         return new BillResponse(
                 bill.getId(),
