@@ -24,6 +24,10 @@ public class BillDAO {
     }
 
     public Optional<Bill> findByIdAndUserIdForUpdate(UUID billId, UUID userId) {
-        return billRepository.findByIdAndUserIdForUpdate(billId, userId);
+        return billRepository.findByIdAndUserIdForUpdateDelete(billId, userId);
+    }
+
+    public void delete(Bill bill) {
+        billRepository.delete(bill);
     }
 }

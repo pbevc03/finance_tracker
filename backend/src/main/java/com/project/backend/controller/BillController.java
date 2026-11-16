@@ -51,4 +51,15 @@ public class BillController {
 
         return ResponseEntity.ok(response);
     }
+
+    @DeleteMapping("/{billId}/delete")
+    public ResponseEntity<Void> delete(
+            @PathVariable UUID billId,
+            @AuthenticationPrincipal Jwt jwt
+    ) {
+        UUID userId = UUID.fromString(jwt.getSubject());
+        billService.delete(billId, userId);
+
+        return ResponseEntity.ok().build();
+    }
 }
